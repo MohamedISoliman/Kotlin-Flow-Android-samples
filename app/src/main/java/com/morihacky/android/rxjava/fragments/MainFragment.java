@@ -12,6 +12,7 @@ import butterknife.OnClick;
 import butterknife.Unbinder;
 
 import com.morihacky.android.rxjava.R;
+import com.morihacky.android.rxjava.backgroundwork.ConcurrencyWithSchedulersDemoFragment;
 import com.morihacky.android.rxjava.pagination.PaginationAutoFragment;
 import com.morihacky.android.rxjava.rxbus.RxBusDemoFragment;
 import com.morihacky.android.rxjava.volley.VolleyDemoFragment;
