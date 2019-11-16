@@ -19,10 +19,10 @@ class PlaygroundFragment : BaseFragment() {
 
     private var _logs: MutableList<String> = ArrayList()
 
-    override fun onCreateView(inflater: LayoutInflater?,
+    override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val view = inflater?.inflate(R.layout.fragment_concurrency_schedulers, container, false)
+        val view = inflater.inflate(R.layout.fragment_concurrency_schedulers, container, false)
 
         _logsList = view?.findViewById(R.id.list_threading_log)
         _setupLogger()
@@ -56,7 +56,7 @@ class PlaygroundFragment : BaseFragment() {
 
     private fun _setupLogger() {
         _logs = ArrayList()
-        _adapter = LogAdapter(activity, ArrayList())
+        _adapter = LogAdapter(context!!, ArrayList())
         _logsList?.adapter = _adapter
     }
 

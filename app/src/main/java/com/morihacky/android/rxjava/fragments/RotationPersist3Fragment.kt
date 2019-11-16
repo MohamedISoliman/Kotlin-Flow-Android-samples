@@ -1,7 +1,7 @@
 package com.morihacky.android.rxjava.fragments
 
-import android.arch.lifecycle.ViewModel
-import android.arch.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper.getMainLooper
@@ -36,12 +36,12 @@ class RotationPersist3Fragment : BaseFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedViewModel = ViewModelProviders.of(activity).get(SharedViewModel::class.java)
+        sharedViewModel = ViewModelProviders.of(activity!!).get(SharedViewModel::class.java)
     }
 
     override fun onCreateView(
-            inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val layout = inflater!!.inflate(R.layout.fragment_rotation_persist, container, false)
+            inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        val layout = inflater.inflate(R.layout.fragment_rotation_persist, container, false)
         ButterKnife.bind(this, layout)
         return layout
     }
@@ -54,9 +54,9 @@ class RotationPersist3Fragment : BaseFragment() {
         disposables +=
                 sharedViewModel
                         .sourceStream()
-                        .subscribe({ l ->
+                        .subscribe { l ->
                             _log("Received element $l")
-                        })
+                        }
     }
 
     // -----------------------------------------------------------------------------------

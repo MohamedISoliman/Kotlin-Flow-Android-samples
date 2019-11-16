@@ -18,10 +18,10 @@ apply plugin: 'kotlin-kapt'
 
 
 dependencies {
-    implementation 'com.android.support:multidex:1.0.3'
-    implementation "com.android.support:support-v13:${supportLibVersion}"
-    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
-    implementation "com.android.support:recyclerview-v7:${supportLibVersion}"
+    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'androidx.legacy:legacy-support-v13:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
 
     implementation 'com.github.kaushikgopal:CoreTextUtils:c703fa12b6'
     implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
@@ -36,9 +36,9 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
     implementation "com.nhaarman:mockito-kotlin:${mockitoKotlinVersion}"
 
-    implementation "android.arch.lifecycle:runtime:${archComponentsVersion}"
-    implementation "android.arch.lifecycle:extensions:${archComponentsVersion}"
-    kapt  "android.arch.lifecycle:compiler:${archComponentsVersion}"
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0'
 
     // ----------------------------------
     //  Rx dependencies
