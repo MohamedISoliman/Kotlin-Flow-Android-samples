@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
 import com.morihacky.android.rxjava.R
@@ -31,7 +32,7 @@ class UsingFragment : BaseFragment() {
         (view.findViewById(R.id.text_description) as TextView).setText(R.string.msg_demo_using)
 
         _setupLogger()
-        view.findViewById(R.id.btn_start_operation).setOnClickListener { executeUsingOperation() }
+        view.findViewById<Button>(R.id.btn_start_operation).setOnClickListener { executeUsingOperation() }
         return view
     }
 
