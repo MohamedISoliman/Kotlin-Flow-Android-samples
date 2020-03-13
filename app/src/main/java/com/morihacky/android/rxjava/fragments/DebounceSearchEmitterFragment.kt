@@ -77,37 +77,13 @@ class DebounceSearchEmitterFragment : BaseFragment() {
                     _log("Dang error. check your logs")
                 }
                 ?.onEach {
+                    _log(String.format("Searching for %s", it.string))
                     Timber.d("--------- onComplete")
                 }
                 ?.onCompletion {
                     Timber.d("--------- onComplete")
                 }
                 ?.launchIn(this)
-
-        _disposable = RxTextView.textChangeEvents(_inputSearchText!!)
-                .debounce(400, TimeUnit.MILLISECONDS) // default Scheduler is Computation
-                .filter { changes: TextViewTextChangeEvent -> CoreNullnessUtils.isNotNullOrEmpty(changes.text().toString()) }
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(_getSearchObserver())
-    }
-
-    // -----------------------------------------------------------------------------------
-    // Main Rx entities
-    private fun _getSearchObserver(): DisposableObserver<TextViewTextChangeEvent?> {
-        return object : DisposableObserver<TextViewTextChangeEvent?>() {
-            override fun onComplete() {
-                Timber.d("--------- onComplete")
-            }
-
-            override fun onError(e: Throwable) {
-                Timber.e(e, "--------- Woops on error!")
-                _log("Dang error. check your logs")
-            }
-
-            override fun onNext(onTextChangeEvent: TextViewTextChangeEvent) {
-                _log(String.format("Searching for %s", onTextChangeEvent.text().toString()))
-            }
-        }
     }
 
     // -----------------------------------------------------------------------------------
