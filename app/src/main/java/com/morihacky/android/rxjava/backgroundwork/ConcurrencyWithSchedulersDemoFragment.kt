@@ -77,32 +77,6 @@ class ConcurrencyWithSchedulersDemoFragment : BaseFragment(){
              .onEach { doSomeLongOperationThatBlocksCurrentThread() }
   }
 
-  /**
-   * Observer that handles the result through the 3 important actions:
-   *
-   *
-   * 1. onCompleted 2. onError 3. onNext
-   */
-  private fun getDisposableObserver(): DisposableObserver<Boolean> {
-    return object : DisposableObserver<Boolean>() {
-
-      override fun onComplete() {
-        log("On complete")
-        progress_operation_running!!.visibility = View.INVISIBLE
-      }
-
-      override fun onError(e: Throwable) {
-        Timber.e(e, "Error in RxJava Demo concurrency")
-        log(String.format("Boo! Error %s", e.message))
-        progress_operation_running!!.visibility = View.INVISIBLE
-      }
-
-      override fun onNext(bool: Boolean) {
-        log(String.format("onNext with return value \"%b\"", bool))
-      }
-    }
-  }
-
   // -----------------------------------------------------------------------------------
   // Method that help wiring up the example (irrelevant to RxJava)
 
@@ -125,13 +99,8 @@ class ConcurrencyWithSchedulersDemoFragment : BaseFragment(){
       adapter.addAll(logs)
     } else {
       logs.add(0, "$logMsg (NOT main thread) ")
-
-      // You can only do below stuff on main thread.
-      Handler(Looper.getMainLooper())
-          .post {
-            adapter.clear()
-            adapter.addAll(logs)
-          }
+      adapter.clear()
+      adapter.addAll(logs)
     }
   }
 
