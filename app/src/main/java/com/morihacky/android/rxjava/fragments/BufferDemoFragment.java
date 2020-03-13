@@ -27,6 +27,9 @@ import io.reactivex.observers.DisposableObserver;
 import timber.log.Timber;
 
 /**
+ * Buffer with a duration: FLOW status not supported yet
+ * see https://github.com/Kotlin/kotlinx.coroutines/issues/1302
+ *--------------------------------------------------------------
  * This is a demonstration of the `buffer` Observable.
  *
  * <p>The buffer observable allows taps to be collected only within a time span. So taps outside the
