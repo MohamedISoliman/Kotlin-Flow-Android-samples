@@ -18,13 +18,20 @@ import co.kaush.core.util.CoreNullnessUtils
 import com.jakewharton.rxbinding2.widget.RxTextView
 import com.jakewharton.rxbinding2.widget.TextViewTextChangeEvent
 import com.morihacky.android.rxjava.R
+import com.morihacky.android.rxjava.textChangesFlow
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.time.milliseconds
 
+@FlowPreview
+@ExperimentalCoroutinesApi
 class DebounceSearchEmitterFragment : BaseFragment() {
 
 
@@ -61,6 +68,22 @@ class DebounceSearchEmitterFragment : BaseFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         _setupLogger()
+
+        _inputSearchText?.textChangesFlow()
+                ?.debounce(400)
+                ?.filter { it.string.isBlank().not() }
+                ?.catch {
+                    Timber.e(it, "--------- Woops on error!")
+                    _log("Dang error. check your logs")
+                }
+                ?.onEach {
+                    Timber.d("--------- onComplete")
+                }
+                ?.onCompletion {
+                    Timber.d("--------- onComplete")
+                }
+                ?.launchIn(this)
+
         _disposable = RxTextView.textChangeEvents(_inputSearchText!!)
                 .debounce(400, TimeUnit.MILLISECONDS) // default Scheduler is Computation
                 .filter { changes: TextViewTextChangeEvent -> CoreNullnessUtils.isNotNullOrEmpty(changes.text().toString()) }
