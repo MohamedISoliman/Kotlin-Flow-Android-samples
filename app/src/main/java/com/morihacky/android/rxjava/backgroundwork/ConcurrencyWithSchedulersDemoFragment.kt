@@ -19,18 +19,19 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_concurrency_schedulers.btn_start_operation
 import kotlinx.android.synthetic.main.fragment_concurrency_schedulers.list_threading_log
 import kotlinx.android.synthetic.main.fragment_concurrency_schedulers.progress_operation_running
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import timber.log.Timber
+import kotlin.collections.forEach
 
-class ConcurrencyWithSchedulersDemoFragment : BaseFragment() {
+@ExperimentalCoroutinesApi
+class ConcurrencyWithSchedulersDemoFragment : BaseFragment(){
 
   private var logs: MutableList<String> = mutableListOf()
   private val adapter: LogAdapter by lazy { LogAdapter(activity!!, mutableListOf()) }
-  private val disposables = CompositeDisposable()
-
-  override fun onDestroy() {
-    super.onDestroy()
-    disposables.clear()
-  }
 
   override fun onActivityCreated(savedInstanceState: Bundle?) {
     super.onActivityCreated(savedInstanceState)
@@ -54,28 +55,26 @@ class ConcurrencyWithSchedulersDemoFragment : BaseFragment() {
   }
 
   private fun startLongOperation() {
-
-    progress_operation_running.visibility = View.VISIBLE
-
-    log("Button Clicked")
-
-    val d = getDisposableObserver()
-
-    getObservable()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(d)
-
-    disposables.add(d)
+    getFlow().onStart {
+      progress_operation_running.visibility = View.VISIBLE
+    }
+            .catch {
+              Timber.e(it, "Error in RxJava Demo concurrency")
+              log(String.format("Boo! Error %s", it.message))
+            }
+            .onEach {
+              log(String.format("onNext with return value \"%b\"", it))
+            }
+            .onCompletion {
+              log("On complete")
+              progress_operation_running!!.visibility = View.INVISIBLE
+            }
+            .launchIn(this)
   }
 
-  private fun getObservable(): Observable<Boolean> {
-    return Observable.just(true)
-        .map { aBoolean ->
-          log("Within Observable")
-          doSomeLongOperationThatBlocksCurrentThread()
-          aBoolean
-        }
+  private fun getFlow(): Flow<Boolean> {
+     return flowOf(true)
+             .onEach { doSomeLongOperationThatBlocksCurrentThread() }
   }
 
   /**
@@ -107,11 +106,11 @@ class ConcurrencyWithSchedulersDemoFragment : BaseFragment() {
   // -----------------------------------------------------------------------------------
   // Method that help wiring up the example (irrelevant to RxJava)
 
-  private fun doSomeLongOperationThatBlocksCurrentThread() {
+  private suspend fun doSomeLongOperationThatBlocksCurrentThread() {
     log("performing long operation")
 
     try {
-      Thread.sleep(3000)
+     delay(3000)
     } catch (e: InterruptedException) {
       Timber.d("Operation was interrupted")
     }
