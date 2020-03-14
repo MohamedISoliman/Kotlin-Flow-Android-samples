@@ -128,7 +128,7 @@ public class PseudoCacheMergeFragment extends BaseFragment {
     GithubApi githubService = GithubService.createGithubService(githubToken);
 
     return githubService
-        .contributors("square", "retrofit")
+        .contributorsRx("square", "retrofit")
         .flatMap(Observable::fromIterable)
         .map(contributor -> new Pair<>(contributor, System.currentTimeMillis()));
   }

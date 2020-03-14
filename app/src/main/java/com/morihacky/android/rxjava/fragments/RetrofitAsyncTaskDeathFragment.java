@@ -86,7 +86,7 @@ public class RetrofitAsyncTaskDeathFragment extends Fragment {
     }.execute(_username.getText().toString());*/
 
     _githubService
-        .user(_username.getText().toString())
+        .userRx(_username.getText().toString())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -110,7 +110,7 @@ public class RetrofitAsyncTaskDeathFragment extends Fragment {
 
     @Override
     protected User doInBackground(String... params) {
-      return _githubService.getUser(params[0]);
+      return _githubService.getUserRx(params[0]);
     }
 
     @Override
