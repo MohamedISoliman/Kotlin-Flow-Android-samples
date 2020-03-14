@@ -1,5 +1,7 @@
-Learning RxJava for Android by example
+Learning Kotlin Flow for Android by example [WIP]
 ==============
+This is the Kotlin Flow of the great repo [RxJava-Android-Samples](https://github.com/kaushikgopal/RxJava-Android-Samples), focusing only at replacing RxJava code and stream manibulation with coroutines and the new Kotin rx streams Flow.
+
 
 This is a repository with real-world useful examples of using RxJava with Android. [It usually will be in a constant state of "Work in Progress" (WIP)](http://blog.kaush.co/2014/09/15/learning-rxjava-with-android-by-example/).
 
