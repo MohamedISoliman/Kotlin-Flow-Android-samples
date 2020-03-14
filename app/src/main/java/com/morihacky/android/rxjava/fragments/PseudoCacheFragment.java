@@ -293,8 +293,7 @@ public class PseudoCacheFragment extends BaseFragment {
   }
 
   private Observable<Contributor> getFreshNetworkData() {
-    String githubToken = getResources().getString(R.string.github_oauth_token);
-    GithubApi githubService = GithubService.createGithubService(githubToken);
+    GithubApi githubService = GithubService.createGithubService();
 
     return githubService
         .contributorsRx("square", "retrofit")

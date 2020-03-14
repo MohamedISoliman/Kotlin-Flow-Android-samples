@@ -40,8 +40,7 @@ class RetrofitFragment : BaseFragment() {
     private var unbinder: Unbinder? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val githubToken = resources.getString(R.string.github_oauth_token)
-        _githubService = GithubService.createGithubService(githubToken)
+        _githubService = GithubService.createGithubService()
         _disposables = CompositeDisposable()
     }
 

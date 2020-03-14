@@ -44,8 +44,7 @@ public class RetrofitAsyncTaskDeathFragment extends Fragment {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    String githubToken = getResources().getString(R.string.github_oauth_token);
-    _githubService = GithubService.createGithubService(githubToken);
+    _githubService = GithubService.createGithubService();
   }
 
   @Override

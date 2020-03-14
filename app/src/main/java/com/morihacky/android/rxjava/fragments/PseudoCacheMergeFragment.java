@@ -124,8 +124,7 @@ public class PseudoCacheMergeFragment extends BaseFragment {
   }
 
   private Observable<Pair<Contributor, Long>> _getFreshData() {
-    String githubToken = getResources().getString(R.string.github_oauth_token);
-    GithubApi githubService = GithubService.createGithubService(githubToken);
+    GithubApi githubService = GithubService.createGithubService();
 
     return githubService
         .contributorsRx("square", "retrofit")
