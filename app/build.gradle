@@ -32,6 +32,8 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
     implementation "com.squareup.okhttp3:okhttp:${okhttpVersion}"
     implementation "com.squareup.okhttp3:okhttp-urlconnection:${okhttpVersion}"
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
+
     implementation 'com.mcxiaoke.volley:library:1.0.19'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}"
@@ -84,6 +86,11 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        buildTypes.each {
+            it.buildConfigField 'String', 'CLIENT_ID', CLIENT_ID
+            it.buildConfigField 'String', 'CLIENT_SECRET', CLIENT_SECRET
+        }
+
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -93,7 +100,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
-        pickFirst  'META-INF/rxjava.properties'
+        pickFirst 'META-INF/rxjava.properties'
     }
 
     compileOptions {
