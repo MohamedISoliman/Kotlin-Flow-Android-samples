@@ -1,43 +1,41 @@
 package com.morihacky.android.rxjava.fragments
 
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.ListView
-import androidx.fragment.app.Fragment
 import butterknife.BindView
 import butterknife.ButterKnife
 import butterknife.OnClick
 import butterknife.Unbinder
 import com.morihacky.android.rxjava.R
-import com.morihacky.android.rxjava.retrofit.Contributor
 import com.morihacky.android.rxjava.retrofit.GithubApi
 import com.morihacky.android.rxjava.retrofit.GithubService
-import com.morihacky.android.rxjava.retrofit.User
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.BiFunction
-import io.reactivex.observers.DisposableObserver
-import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.*
 import timber.log.Timber
 import java.util.*
 
-class RetrofitFragment : Fragment() {
+@ExperimentalCoroutinesApi
+class RetrofitFragment : BaseFragment() {
+    @JvmField
     @BindView(R.id.demo_retrofit_contributors_username)
     var _username: EditText? = null
 
+    @JvmField
     @BindView(R.id.demo_retrofit_contributors_repository)
     var _repo: EditText? = null
 
+    @JvmField
     @BindView(R.id.log_list)
     var _resultList: ListView? = null
     private var _adapter: ArrayAdapter<String>? = null
-    private var _githubService: GithubApi? = null
+    private lateinit var _githubService: GithubApi
     private var _disposables: CompositeDisposable? = null
     private var unbinder: Unbinder? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,79 +67,68 @@ class RetrofitFragment : Fragment() {
 
     @OnClick(R.id.btn_demo_retrofit_contributors)
     fun onListContributorsClicked() {
-        _adapter!!.clear()
-        _disposables!!.add( //
-                _githubService
-                        .contributors(_username!!.text.toString(), _repo!!.text.toString())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(
-                                object : DisposableObserver<List<Contributor?>?>() {
-                                    override fun onComplete() {
-                                        Timber.d("Retrofit call 1 completed")
-                                    }
 
-                                    override fun onError(e: Throwable) {
-                                        Timber.e(e, "woops we got an error while getting the list of contributors")
-                                    }
+        flow {
+            _githubService.contributors(_username!!.text.toString(), _repo!!.text.toString())
+                    .forEach { emit(it) }
 
-                                    override fun onNext(contributors: List<Contributor>) {
-                                        for (c in contributors) {
-                                            _adapter!!.add(String.format(
-                                                    "%s has made %d contributions to %s",
-                                                    c.login, c.contributions, _repo!!.text.toString()))
-                                            Timber.d(
-                                                    "%s has made %d contributions to %s",
-                                                    c.login, c.contributions, _repo!!.text.toString())
-                                        }
-                                    }
-                                }))
+        }
+                .onStart { _adapter!!.clear() }
+                .catch {
+                    Timber.e(it, "woops we got an error while getting the list of contributors")
+                }
+                .onEach {
+                    _adapter!!.add(String.format(
+                            "%s has made %d contributions to %s",
+                            it.login, it.contributions, _repo!!.text.toString()))
+                    Timber.d(
+                            "%s has made %d contributions to %s",
+                            it.login, it.contributions, _repo!!.text.toString())
+
+                }
+                .onCompletion {
+                    Timber.d("Retrofit call 1 completed")
+                }.launchIn(this)
     }
 
+    @FlowPreview
     @OnClick(R.id.btn_demo_retrofit_contributors_with_user_info)
     fun onListContributorsWithFullUserInfoClicked() {
-        _adapter!!.clear()
-        _disposables!!.add(
-                _githubService
-                        .contributors(_username!!.text.toString(), _repo!!.text.toString())
-                        .flatMap { source: List<Contributor?>? -> Observable.fromIterable(source) }
-                        .flatMap { contributor: Contributor ->
-                            val _userObservable = _githubService
-                                    .user(contributor.login)
-                                    .filter { user: User -> !TextUtils.isEmpty(user.name) && !TextUtils.isEmpty(user.email) }
-                            Observable.zip(_userObservable, Observable.just(contributor), BiFunction<User, Contributor, android.util.Pair<User, Contributor>> { first: User?, second: Contributor? -> Pair(first, second) })
-                        }
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeWith(
-                                object : DisposableObserver<android.util.Pair<User?, Contributor?>?>() {
-                                    override fun onComplete() {
-                                        Timber.d("Retrofit call 2 completed ")
-                                    }
 
-                                    override fun onError(e: Throwable) {
-                                        Timber.e(
-                                                e,
-                                                "error while getting the list of contributors along with full " + "names")
-                                    }
+        flow {
+            _githubService.contributors(_username!!.text.toString(), _repo!!.text.toString())
+                    .forEach { emit(it) }
 
-                                    override fun onNext(pair: android.util.Pair<User, Contributor>) {
-                                        val user = pair.first
-                                        val contributor = pair.second
-                                        _adapter!!.add(String.format(
-                                                "%s(%s) has made %d contributions to %s",
-                                                user.name,
-                                                user.email,
-                                                contributor.contributions,
-                                                _repo!!.text.toString()))
-                                        _adapter!!.notifyDataSetChanged()
-                                        Timber.d(
-                                                "%s(%s) has made %d contributions to %s",
-                                                user.name,
-                                                user.email,
-                                                contributor.contributions,
-                                                _repo!!.text.toString())
-                                    }
-                                }))
+        }
+
+                .onStart { _adapter!!.clear() }
+                .flatMapMerge { contributor ->
+                    flowOf(_githubService.getUser(contributor.login))
+                            .filter { user -> !user.name.isNullOrEmpty() && !user.email.isNullOrEmpty() }
+                            .zip(flowOf(contributor)) { user, _ -> Pair(user, contributor) }
+                }
+                .onEach {
+                    val user = it.first
+                    val contributor = it.second
+                    _adapter!!.add(String.format(
+                            "%s(%s) has made %d contributions to %s",
+                            user.name,
+                            user.email,
+                            contributor.contributions,
+                            _repo!!.text.toString()))
+                    _adapter!!.notifyDataSetChanged()
+                    Timber.d(
+                            "%s(%s) has made %d contributions to %s",
+                            user.name,
+                            user.email,
+                            contributor.contributions,
+                            _repo!!.text.toString())
+                }
+                .catch {
+                    Timber.e(it, "error while getting the list of contributors along with full " + "names")
+                }
+                .onCompletion {
+                    Timber.d("Retrofit call 2 completed ")
+                }.launchIn(this)
     }
 }
